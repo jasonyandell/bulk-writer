@@ -6,19 +6,19 @@ using Xunit;
 
 namespace BulkWriter.Tests
 {
-    public class BulkWriterTests
+    public class BulkWriterInitializationTests
     {
         private readonly string _connectionString = TestHelpers.ConnectionString;
-        private readonly string _tableName = nameof(BulkWriterTestsMyTestClass);
+        private readonly string _tableName = nameof(BulkWriterInitializationTestsMyTestClass);
 
-        public class BulkWriterTestsMyTestClass
+        public class BulkWriterInitializationTestsMyTestClass
         {
             public int Id { get; set; }
 
             public string Name { get; set; }
         }
 
-        public BulkWriterTests()
+        public BulkWriterInitializationTests()
         {
             TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
 
@@ -31,18 +31,30 @@ namespace BulkWriter.Tests
         }
 
         [Fact]
-        public async Task CanWriteSync()
+        public async Task CanSetBulkCopyParameters()
         {
-            var writer = new BulkWriter<BulkWriterTestsMyTestClass>(_connectionString);
+            const int timeout = 10;
+            const int batchSize = 1000;
 
-            var items = Enumerable.Range(1, 1000).Select(i => new BulkWriterTestsMyTestClass { Id = i, Name = "Bob"});
+            var writer = new BulkWriter<BulkWriterInitializationTestsMyTestClass>(_connectionString)
+            {
+                BulkCopyTimeout = timeout,
+                BatchSize = batchSize,
+                BulkCopySetup = bcp =>
+                {
+                    Assert.Equal(timeout, bcp.BulkCopyTimeout);
+                    Assert.Equal(batchSize, bcp.BatchSize);
+                }
+            };
+
+            var items = Enumerable.Range(1, 10)
+                .Select(i => new BulkWriterInitializationTestsMyTestClass {Id = i, Name = "Bob"});
 
             writer.WriteToDatabase(items);
 
             var count = (int) await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {_tableName}");
 
-            Assert.Equal(1000, count);
+            Assert.Equal(10, count);
         }
-
     }
 }

@@ -42,35 +42,5 @@ namespace BulkWriter.Tests
             Assert.Equal(1000, count);
         }
 
-        [Fact]
-        public async Task CanSetBulkCopyParameters()
-        {
-            const int timeout = 10;
-            const int batchSize = 1000;
-
-            BulkWriter<BulkWriterAsyncTestsMyTestClass> writer = null;
-            try
-            {
-                writer = new BulkWriter<BulkWriterAsyncTestsMyTestClass>(_connectionString)
-                {
-                    BulkCopyTimeout = timeout,
-                    BatchSize = batchSize,
-                    BulkCopySetup = bcp =>
-                    {
-                        Assert.Equal(timeout, bcp.BulkCopyTimeout);
-                        Assert.Equal(batchSize, bcp.BatchSize);
-                    }
-                };
-
-                var items = Enumerable.Range(1, 10).Select(i => new BulkWriterAsyncTestsMyTestClass { Id = i, Name = "Bob" });
-
-                await writer.WriteToDatabaseAsync(items);  // Asserts invoked as a side-effect
-            }
-            finally
-            {
-                writer?.Dispose();
-            }
-        }
-
     }
 }
