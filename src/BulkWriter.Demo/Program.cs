@@ -13,11 +13,12 @@ namespace BulkWriter.Demo
             SetupDb();
 
             var timer = new Stopwatch();
-            using (var bulkWriter = new BulkWriter<MyDomainEntity>(@"Data Source=.\sqlexpress;Database=BulkWriter.Demo;Trusted_Connection=True;Connection Timeout=300")
+            using (var bulkWriter = new BulkWriter<MyDomainEntity>(@"Data Source=.\sqlexpress;Database=BulkWriter.Demo;Trusted_Connection=True;Connection Timeout=300",
+            sbc =>
             {
-                BulkCopyTimeout = 0,
-                BatchSize = 10000
-            })
+                sbc.BulkCopyTimeout = 0;
+                sbc.BatchSize = 10000;
+            }))
             {
                 var items = GetDomainEntities();
                 timer.Start();

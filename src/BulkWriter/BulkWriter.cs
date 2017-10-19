@@ -30,14 +30,6 @@ namespace BulkWriter
                 EnableStreaming = true,
                 BulkCopyTimeout = 0
             };
-            if (BatchSize.HasValue)
-                sqlBulkCopy.BatchSize = BatchSize.Value;
-            if (BulkCopyTimeout.HasValue)
-                sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout.Value;
-
-            //sqlBulkCopy.BatchSize = BatchSize ?? sqlBulkCopy.BatchSize;
-            //sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout ?? sqlBulkCopy.BulkCopyTimeout;
-            BulkCopySetup(sqlBulkCopy);
 
             foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
@@ -47,10 +39,16 @@ namespace BulkWriter
             _sqlBulkCopy = sqlBulkCopy;
         }
 
-        public int? BatchSize { get; set; }
-        public int? BulkCopyTimeout { get; set; }
-        public Action<SqlBulkCopy> BulkCopySetup { get; set; } = sbc => {};
- 
+        public BulkWriter(string connectionString, Action<SqlBulkCopy> bulkCopySetup)
+            : this(connectionString)
+        {
+            bulkCopySetup(_sqlBulkCopy);
+        }
+
+        public int BatchSize => _sqlBulkCopy.BatchSize;
+
+        public int BulkCopyTimeout => _sqlBulkCopy.BulkCopyTimeout;
+
         public void WriteToDatabase(IEnumerable<TResult> items)
         {
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
