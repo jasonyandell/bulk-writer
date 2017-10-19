@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data.SqlClient;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -43,6 +41,5 @@ namespace BulkWriter.Tests
 
             Assert.Equal(1000, count);
         }
-
     }
 }
