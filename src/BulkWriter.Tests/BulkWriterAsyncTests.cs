@@ -41,6 +41,5 @@ namespace BulkWriter.Tests
 
             Assert.Equal(1000, count);
         }
-
     }
 }
