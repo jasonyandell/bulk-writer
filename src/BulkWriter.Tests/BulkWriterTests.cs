@@ -41,5 +41,22 @@ namespace BulkWriter.Tests
 
             Assert.Equal(1000, count);
         }
-    }
+
+        [Fact]
+        public void CanInitializeBulkCopyFromConstructor()
+        {
+            const int batchSize = 100;
+            const int timeout = 90;
+
+            var writer = new BulkWriter<BulkWriterTestsMyTestClass>(_connectionString,
+                sbc =>
+                {
+                    sbc.BatchSize = batchSize;
+                    sbc.BulkCopyTimeout = timeout;
+                });
+
+            Assert.Equal(batchSize, writer.BatchSize);
+            Assert.Equal(timeout, writer.BulkCopyTimeout);
+        }
+   }
 }
